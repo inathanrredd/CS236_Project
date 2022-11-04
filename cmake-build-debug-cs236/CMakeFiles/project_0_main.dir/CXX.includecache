@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/users/guest/r/reddn/Fall2022/Book.cpp
+string
+-
+sstream
+-
+Book.h
+/users/guest/r/reddn/Fall2022/Book.h
+
+/users/guest/r/reddn/Fall2022/Book.h
+string
+-
+iostream
+-
+

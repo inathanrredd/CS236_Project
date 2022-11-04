@@ -1,0 +1,1 @@
+/usr/bin/c++  -g   CMakeFiles/project_0_main.dir/Book.cpp.o CMakeFiles/project_0_main.dir/BookCreator.cpp.o CMakeFiles/project_0_main.dir/BookListCreator.cpp.o CMakeFiles/project_0_main.dir/Info.cpp.o CMakeFiles/project_0_main.dir/Library.cpp.o CMakeFiles/project_0_main.dir/main.cpp.o  -o project_0_main 
