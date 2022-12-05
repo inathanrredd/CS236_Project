@@ -3,6 +3,7 @@
 //
 
 #include "Relation.h"
+#include <algorithm>
 
 Relation::Relation() {
 
@@ -148,14 +149,43 @@ Relation Relation::join(Relation rel) {
     return newRelation;
 }
 
-Header *Relation::joinHeader(Header *header) {
-    return header;   //TODO
+Header *Relation::joinHeader(Header *head2) {
+    std::cout << "In joinHeader" << std::endl;
+    std::vector<std::string> colNames = this->getColumnNames()->getVecAttributes();
+    for (auto name:head2->getVecAttributes()) {
+        if (std::find(colNames.begin(), colNames.end(), name) == colNames.end()) {
+            colNames.emplace_back(name);
+        }
+    }
+    Header* newHeader = new Header(colNames);
+    std::cout << newHeader->printAllAttributes() << std::endl;
+    return newHeader;
 }
 
 bool Relation::isJoinable(Tuple tup1, Tuple tup2, Header *head1, Header *head2) {
-    return true;    //TODO
+    for (unsigned int i=0; i<head2->getVecAttributes().size(); i++) {
+        for(unsigned int j=0; j<head1->getVecAttributes().size(); j++) {
+            if (head2->getVecAttributes()[i] == head1->getVecAttributes()[j]) {
+                if (tup1.getTuple()[j] != tup2.getTuple()[i]) {
+                    std::cout << "Not joinable" << std::endl;
+                    return false;
+                }
+            }
+        }
+    }
+    std::cout << "Joinable" << std::endl;
+    return true;
 }
 
 Tuple Relation::combineTuples(Tuple tup1, Tuple tup2, Header *head1, Header *head2) {
-    return tup1;    //TODO
+    std::vector<std::string> values = tup1.getTuple();
+    std::vector<std::string> colNames = head1->getVecAttributes();
+    for (unsigned int i=0; i<head2->getVecAttributes().size(); i++) {
+        if (std::find(colNames.begin(), colNames.end(), head2->getVecAttributes()[i]) == colNames.end()) {
+            values.emplace_back(tup2.getTuple()[i]);
+        }
+    }
+    Tuple newTuple = Tuple(values);
+    std::cout << "New tuple created" << std::endl;
+    return newTuple;
 }

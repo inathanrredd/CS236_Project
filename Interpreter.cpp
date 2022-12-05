@@ -11,6 +11,7 @@ Interpreter::Interpreter(DatalogProgram* program) {
 void Interpreter::interpret() {
     interpretSchemes();
     interpretFacts();
+    interpretRules();
     interpretQueries();
 }
 
@@ -153,7 +154,7 @@ void Interpreter::interpretRules() {
             newRel.rename(myVars);
             std::string str = pred->toString();
             str.pop_back();
-            str = str + "? ";
+            str = str + " Rule ";
             if (numTuples > 0) {
                 str = str + "Yes(" + std::to_string(numTuples) + ")\n";
             }
@@ -164,7 +165,11 @@ void Interpreter::interpretRules() {
             std::cout << newRel.toString();
             tempRelations.emplace_back(newRel);
         }
-
+        Relation joinedRelation = tempRelations[0];
+        for (unsigned int i=0;i<tempRelations.size();i++) {
+            joinedRelation = joinedRelation.join(tempRelations[i]);
+        }
+        std::cout << joinedRelation.toString() << std::endl;
     }
 }
 //
