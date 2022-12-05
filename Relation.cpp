@@ -130,3 +130,32 @@ void Relation::clearTuples() {
 void Relation::setColumnNames(Header *cols) {
     columnNames = cols;
 }
+
+Relation Relation::join(Relation rel) {
+    Header* head1 = rel.getColumnNames();
+    Header* newHeader = joinHeader(head1);
+    Relation newRelation = Relation("new", newHeader);
+    std::set<Tuple> tupList1 = this->getTuples();
+    std::set<Tuple> tupList2 = rel.getTuples();
+    std::set<Tuple> newTupList;
+    for (auto each:tupList1) {
+        for (auto tup:tupList2) {
+            if (isJoinable(each,tup,this->getColumnNames(),rel.getColumnNames())) {
+                newRelation.AddTuple(combineTuples(each,tup,this->getColumnNames(),rel.getColumnNames()));
+            }
+        }
+    }
+    return newRelation;
+}
+
+Header *Relation::joinHeader(Header *header) {
+    return header;   //TODO
+}
+
+bool Relation::isJoinable(Tuple tup1, Tuple tup2, Header *head1, Header *head2) {
+    return true;    //TODO
+}
+
+Tuple Relation::combineTuples(Tuple tup1, Tuple tup2, Header *head1, Header *head2) {
+    return tup1;    //TODO
+}

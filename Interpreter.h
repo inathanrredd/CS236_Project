@@ -15,12 +15,14 @@ private:
     std::map<std::string, int> myMap;
     std::vector<int> varIndexes;
     std::vector<std::string> myVars;
+    std::vector<Relation> tempRelations;
 
 public:
     Interpreter(DatalogProgram* program);
     void interpretSchemes();
     void interpretFacts();
     void interpretQueries();
+    void interpretRules();
     void interpret();
     void printAllRelations();
 //    Relation* evaluatePredicate(Predicate* p);

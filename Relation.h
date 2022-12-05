@@ -31,6 +31,10 @@ public:
     std::set<Tuple> getTuples();
     void clearTuples();
     void setColumnNames(Header* cols);
+    Relation join(Relation rel);
+    Header* joinHeader(Header* header);
+    bool isJoinable(Tuple tup1, Tuple tup2, Header* head1, Header* head2);
+    Tuple combineTuples(Tuple tup1, Tuple tup2, Header* head1, Header* head2);
 };
 
 

@@ -16,6 +16,8 @@ public:
     Rule(std::vector<Predicate*> input);
     ~Rule();
     std::string toString();
+    std::vector<Predicate*> getPredicates();
+    Predicate* getHeadPredicate();
 };
 
 

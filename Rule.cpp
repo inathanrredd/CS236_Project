@@ -32,3 +32,11 @@ std::string Rule::toString() {
     str += ".";
     return str;
 }
+
+std::vector<Predicate *> Rule::getPredicates() {
+    return predicates;
+}
+
+Predicate *Rule::getHeadPredicate() {
+    return headPredicate;
+}

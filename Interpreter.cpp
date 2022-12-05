@@ -103,6 +103,70 @@ void Interpreter::interpretQueries() {
         std::cout << newRel.toString();
     }
 }
+
+void Interpreter::interpretRules() {
+    std::vector<Rule*> rules = program->getRules();
+    for (auto rule: rules) {
+        for(auto pred: rule->getPredicates()) {
+            myMap.clear();
+            varIndexes.clear();
+            myVars.clear();
+            std::string name = pred->getName();
+            Relation rel = database.GetRelationCopy(name);
+            Relation newRel = Relation(name, rel.getColumnNames());
+            bool doneSelect1 = false;
+            bool doneSelect2 = false;
+            for (unsigned int i=0; i<pred->getParameters().size();i++) {
+
+                if (pred->getParameters()[i]->isItConstant()) {
+                    newRel.clearTuples();
+                    auto it = myMap.find(pred->getParameters()[i]->getValue());
+                    if (it == myMap.end()) {
+                        myMap.insert(std::pair<std::string,int>(pred->getParameters()[i]->getValue(),i));
+                    }
+                    newRel.select1(i,pred->getParameters()[i]->getValue(), rel);
+                    doneSelect1 = true;
+                    rel = newRel;
+                }
+                else {
+                    auto it = myMap.find(pred->getParameters()[i]->getValue());
+                    if (it == myMap.end()) {
+                        myMap.insert(std::pair<std::string,int>(pred->getParameters()[i]->getValue(),i));
+                        varIndexes.emplace_back(i);
+                        myVars.emplace_back(pred->getParameters()[i]->getValue());
+                    }
+                    else {
+                        newRel.clearTuples();
+                        newRel.select2(it->second,i,rel);
+                        doneSelect2=true;
+                        rel = newRel;
+                    }
+                }
+            }
+            if (!doneSelect1 && !doneSelect2) {
+                newRel = rel;
+            }
+            int numTuples = newRel.getTuples().size();
+            rel = newRel;
+            newRel.clearTuples();
+            newRel.project(varIndexes, rel);
+            newRel.rename(myVars);
+            std::string str = pred->toString();
+            str.pop_back();
+            str = str + "? ";
+            if (numTuples > 0) {
+                str = str + "Yes(" + std::to_string(numTuples) + ")\n";
+            }
+            else {
+                str = str + "No\n";
+            }
+            std::cout << str;
+            std::cout << newRel.toString();
+            tempRelations.emplace_back(newRel);
+        }
+
+    }
+}
 //
 //Relation* Interpreter::evaluatePredicate(Predicate* p) {
 //
