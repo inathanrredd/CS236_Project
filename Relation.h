@@ -21,6 +21,7 @@ public:
     Relation(std::string str, Header* columnNames);
     ~Relation();
     std::string GetName();
+    void setName(std::string);
     void AddTuple(Tuple newTuple);
     std::string toString();
     void select1(int columnIndex, std::string value, Relation rel);

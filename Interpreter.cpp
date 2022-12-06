@@ -3,6 +3,7 @@
 //
 
 #include "Interpreter.h"
+#include <algorithm>
 
 Interpreter::Interpreter(DatalogProgram* program) {
     this->program = program;
@@ -46,6 +47,7 @@ void Interpreter::interpretFacts() {
 }
 
 void Interpreter::interpretQueries() {
+    std::cout << "Query Evaluation" << std::endl;
     std::vector<Predicate*> queries = program->getQueries();
     for (auto query : queries) {
         myMap.clear();
@@ -106,71 +108,97 @@ void Interpreter::interpretQueries() {
 }
 
 void Interpreter::interpretRules() {
+    std::cout << "Rule Evaluation" << std::endl;
     std::vector<Rule*> rules = program->getRules();
-    for (auto rule: rules) {
-        for(auto pred: rule->getPredicates()) {
-            myMap.clear();
-            varIndexes.clear();
-            myVars.clear();
-            std::string name = pred->getName();
-            Relation rel = database.GetRelationCopy(name);
-            Relation newRel = Relation(name, rel.getColumnNames());
-            bool doneSelect1 = false;
-            bool doneSelect2 = false;
-            for (unsigned int i=0; i<pred->getParameters().size();i++) {
+    int startCount = 0;
+    int endCount = 1;
+    int rulesIterations = 0;
+    while(startCount != endCount) {
+        startCount = endCount;
+        for (auto rule: rules) {
+            if (rulesIterations == 0) {
+                std::cout << rule->toString() << std::endl;
+            }
+            for (auto pred: rule->getPredicates()) {
+                myMap.clear();
+                varIndexes.clear();
+                myVars.clear();
+                std::string name = pred->getName();
+                Relation rel = database.GetRelationCopy(name);
+                Relation newRel = Relation(name, rel.getColumnNames());
+                bool doneSelect1 = false;
+                bool doneSelect2 = false;
+                for (unsigned int i = 0; i < pred->getParameters().size(); i++) {
 
-                if (pred->getParameters()[i]->isItConstant()) {
-                    newRel.clearTuples();
-                    auto it = myMap.find(pred->getParameters()[i]->getValue());
-                    if (it == myMap.end()) {
-                        myMap.insert(std::pair<std::string,int>(pred->getParameters()[i]->getValue(),i));
-                    }
-                    newRel.select1(i,pred->getParameters()[i]->getValue(), rel);
-                    doneSelect1 = true;
-                    rel = newRel;
-                }
-                else {
-                    auto it = myMap.find(pred->getParameters()[i]->getValue());
-                    if (it == myMap.end()) {
-                        myMap.insert(std::pair<std::string,int>(pred->getParameters()[i]->getValue(),i));
-                        varIndexes.emplace_back(i);
-                        myVars.emplace_back(pred->getParameters()[i]->getValue());
-                    }
-                    else {
+                    if (pred->getParameters()[i]->isItConstant()) {
                         newRel.clearTuples();
-                        newRel.select2(it->second,i,rel);
-                        doneSelect2=true;
+                        auto it = myMap.find(pred->getParameters()[i]->getValue());
+                        if (it == myMap.end()) {
+                            myMap.insert(std::pair<std::string, int>(pred->getParameters()[i]->getValue(), i));
+                        }
+                        newRel.select1(i, pred->getParameters()[i]->getValue(), rel);
+                        doneSelect1 = true;
                         rel = newRel;
+                    } else {
+                        auto it = myMap.find(pred->getParameters()[i]->getValue());
+                        if (it == myMap.end()) {
+                            myMap.insert(std::pair<std::string, int>(pred->getParameters()[i]->getValue(), i));
+                            varIndexes.emplace_back(i);
+                            myVars.emplace_back(pred->getParameters()[i]->getValue());
+                        } else {
+                            newRel.clearTuples();
+                            newRel.select2(it->second, i, rel);
+                            doneSelect2 = true;
+                            rel = newRel;
+                        }
                     }
                 }
+                if (!doneSelect1 && !doneSelect2) {
+                    newRel = rel;
+                }
+                //int numTuples = newRel.getTuples().size();
+                rel = newRel;
+                newRel.clearTuples();
+                newRel.project(varIndexes, rel);
+                newRel.rename(myVars);
+//                std::string str = pred->toString();
+//                str.pop_back();
+//                str = str + " Rule ";
+//                if (numTuples > 0) {
+//                    str = str + "Yes(" + std::to_string(numTuples) + ")\n";
+//                } else {
+//                    str = str + "No\n";
+//                }
+//                std::cout << str;
+//                std::cout << newRel.toString();
+                tempRelations.emplace_back(newRel);
             }
-            if (!doneSelect1 && !doneSelect2) {
-                newRel = rel;
+            Relation joinedRelation = tempRelations[0];
+            for (unsigned int i = 0; i < tempRelations.size(); i++) {
+                joinedRelation = joinedRelation.join(tempRelations[i]);
             }
-            int numTuples = newRel.getTuples().size();
-            rel = newRel;
-            newRel.clearTuples();
-            newRel.project(varIndexes, rel);
-            newRel.rename(myVars);
-            std::string str = pred->toString();
-            str.pop_back();
-            str = str + " Rule ";
-            if (numTuples > 0) {
-                str = str + "Yes(" + std::to_string(numTuples) + ")\n";
+
+            //std::cout << joinedRelation.toString() << std::endl;
+            std::vector<Parameter *> parameters = rule->getHeadPredicate()->getParameters();
+            std::vector<std::string> parameterStrings;
+            for (auto each: parameters) {
+                parameterStrings.emplace_back(each->getValue());
             }
-            else {
-                str = str + "No\n";
+            std::vector<int> columnsToProject;
+            for (unsigned int i = 0; i < joinedRelation.getColumnNames()->getVecAttributes().size(); i++) {
+                if (std::find(parameterStrings.begin(), parameterStrings.end(),
+                              joinedRelation.getColumnNames()->getVecAttributes()[i]) != parameterStrings.end()) {
+                    columnsToProject.emplace_back(i);
+                }
             }
-            std::cout << str;
-            std::cout << newRel.toString();
-            tempRelations.emplace_back(newRel);
+            joinedRelation.project(columnsToProject, joinedRelation);
+            joinedRelation.setName(rule->getHeadPredicate()->getName());
+            database.unite(joinedRelation);
         }
-        Relation joinedRelation = tempRelations[0];
-        for (unsigned int i=0;i<tempRelations.size();i++) {
-            joinedRelation = joinedRelation.join(tempRelations[i]);
-        }
-        std::cout << joinedRelation.toString() << std::endl;
+        endCount = database.countAllTuples();
+        rulesIterations++;
     }
+
 }
 //
 //Relation* Interpreter::evaluatePredicate(Predicate* p) {

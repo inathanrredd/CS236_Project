@@ -19,7 +19,9 @@ public:
     void addRelation(Relation* newRelation);
     Relation* GetRelation(std::string relationName);
     Relation GetRelationCopy(std::string relationName);
+    void unite(Relation rel);
     void printAllRelations();
+    int countAllTuples();
 
 };
 

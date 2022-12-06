@@ -29,6 +29,14 @@ Relation Database::GetRelationCopy(std::string relationName) {
     return rel;
 }
 
+void Database::unite(Relation rel) {
+    std::string relationName = rel.GetName();
+    Relation* dbRelation = relations.find(relationName)->second;
+    for (auto each:rel.getTuples())  {
+        dbRelation->AddTuple(each);
+    }
+}
+
 void Database::printAllRelations() {
     std::string str;
     for (auto relation : relations) {
@@ -36,4 +44,12 @@ void Database::printAllRelations() {
         str += "\n";
     }
     std::cout << str;
+}
+
+int Database::countAllTuples() {
+    int count = 0;
+    for (auto it:relations) {
+        count += it.second->getTuples().size();
+    }
+    return count;
 }

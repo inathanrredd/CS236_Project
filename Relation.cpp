@@ -21,6 +21,10 @@ std::string Relation::GetName() {
     return name;
 }
 
+void Relation::setName(std::string str) {
+    name = str;
+}
+
 void Relation::AddTuple(Tuple newTuple) {
     tuples.insert(newTuple);
 }
@@ -150,7 +154,7 @@ Relation Relation::join(Relation rel) {
 }
 
 Header *Relation::joinHeader(Header *head2) {
-    std::cout << "In joinHeader" << std::endl;
+    //std::cout << "In joinHeader" << std::endl;
     std::vector<std::string> colNames = this->getColumnNames()->getVecAttributes();
     for (auto name:head2->getVecAttributes()) {
         if (std::find(colNames.begin(), colNames.end(), name) == colNames.end()) {
@@ -158,7 +162,7 @@ Header *Relation::joinHeader(Header *head2) {
         }
     }
     Header* newHeader = new Header(colNames);
-    std::cout << newHeader->printAllAttributes() << std::endl;
+//    std::cout << newHeader->printAllAttributes() << std::endl;
     return newHeader;
 }
 
@@ -167,13 +171,13 @@ bool Relation::isJoinable(Tuple tup1, Tuple tup2, Header *head1, Header *head2) 
         for(unsigned int j=0; j<head1->getVecAttributes().size(); j++) {
             if (head2->getVecAttributes()[i] == head1->getVecAttributes()[j]) {
                 if (tup1.getTuple()[j] != tup2.getTuple()[i]) {
-                    std::cout << "Not joinable" << std::endl;
+                    //std::cout << "Not joinable" << std::endl;
                     return false;
                 }
             }
         }
     }
-    std::cout << "Joinable" << std::endl;
+    //std::cout << "Joinable" << std::endl;
     return true;
 }
 
@@ -186,6 +190,6 @@ Tuple Relation::combineTuples(Tuple tup1, Tuple tup2, Header *head1, Header *hea
         }
     }
     Tuple newTuple = Tuple(values);
-    std::cout << "New tuple created" << std::endl;
+    //std::cout << "New tuple created" << std::endl;
     return newTuple;
 }
