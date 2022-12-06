@@ -22,6 +22,7 @@ public:
     void unite(Relation rel);
     void printAllRelations();
     int countAllTuples();
+    int countTuples(std::string name);
 
 };
 

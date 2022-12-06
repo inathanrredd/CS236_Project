@@ -113,12 +113,11 @@ void Interpreter::interpretRules() {
     int startCount = 0;
     int endCount = 1;
     int rulesIterations = 0;
+    int newTupleCount = 0;
     while(startCount != endCount) {
         startCount = endCount;
         for (auto rule: rules) {
-            if (rulesIterations == 0) {
-                std::cout << rule->toString() << std::endl;
-            }
+            std::cout << rule->toString() << std::endl;
             for (auto pred: rule->getPredicates()) {
                 myMap.clear();
                 varIndexes.clear();
@@ -178,7 +177,7 @@ void Interpreter::interpretRules() {
                 joinedRelation = joinedRelation.join(tempRelations[i]);
             }
 
-            //std::cout << joinedRelation.toString() << std::endl;
+
             std::vector<Parameter *> parameters = rule->getHeadPredicate()->getParameters();
             std::vector<std::string> parameterStrings;
             for (auto each: parameters) {
@@ -194,11 +193,19 @@ void Interpreter::interpretRules() {
             joinedRelation.project(columnsToProject, joinedRelation);
             joinedRelation.setName(rule->getHeadPredicate()->getName());
             database.unite(joinedRelation);
+
+            if (rulesIterations==0) {
+                std::cout << joinedRelation.toString();
+            }
+            else if (database.countTuples(joinedRelation.GetName()) > newTupleCount){
+                std::cout << joinedRelation.toString(newTupleCount);
+            }
+            newTupleCount = database.countTuples(joinedRelation.GetName());
         }
         endCount = database.countAllTuples();
         rulesIterations++;
     }
-
+    std::cout << "\nSchemes populated after " << rulesIterations << " passes through the Rules.\n" << std::endl;
 }
 //
 //Relation* Interpreter::evaluatePredicate(Predicate* p) {

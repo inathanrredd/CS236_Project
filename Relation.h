@@ -24,6 +24,7 @@ public:
     void setName(std::string);
     void AddTuple(Tuple newTuple);
     std::string toString();
+    std::string toString(int num);
     void select1(int columnIndex, std::string value, Relation rel);
     void select2(int columnIndex1, int columnIndex2, Relation rel);
     void project(std::vector<int> columnsToProject, Relation rel);

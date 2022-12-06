@@ -58,6 +58,35 @@ std::string Relation::toString() {
     return str;
 }
 
+std::string Relation::toString(int num) {
+    if (this->columnNames->getVecAttributes().empty()) {
+        std::string s;
+        return s;
+    }
+    std::string str = "  ";
+    for (auto tuple : tuples) {
+        for (unsigned i=num;i < columnNames->getVecAttributes().size();i++) {
+            if (i < columnNames->getVecAttributes().size()-1) {
+                str = str + columnNames->printAttributeAt(i) + "=";
+                str = str + tuple.printTuple(i) + ", ";
+            }
+            else {
+                str = str + columnNames->printAttributeAt(i) + "=";
+                str = str + tuple.printTuple(i);
+            }
+        }
+        str += "\n  ";
+    }
+    if (!str.empty()) {
+        str.pop_back();
+    }
+    if (!str.empty()) {
+        str.pop_back();
+    }
+
+    return str;
+}
+
 void Relation::select1(int columnIndex, std::string value, Relation rel) {
     for (auto tuple : rel.tuples) {
         std::vector<std::string> values = tuple.getTuple();

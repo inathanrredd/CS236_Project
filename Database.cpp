@@ -53,3 +53,7 @@ int Database::countAllTuples() {
     }
     return count;
 }
+
+int Database::countTuples(std::string name) {
+    return relations.find(name)->second->getTuples().size();
+}
