@@ -30,3 +30,11 @@ bool Tuple::operator<(const Tuple &rhs) const {
 std::vector<std::string> Tuple::getTuple() {
     return values;
 }
+
+std::string Tuple::toString() {
+    std::string str;
+    for (auto each:this->getTuple()) {
+        str += each + ", ";
+    }
+    return str;
+}

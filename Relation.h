@@ -28,6 +28,7 @@ public:
     void select1(int columnIndex, std::string value, Relation rel);
     void select2(int columnIndex1, int columnIndex2, Relation rel);
     void project(std::vector<int> columnsToProject, Relation rel);
+    Relation project(std::vector<int> columnsToProject);
     void rename(std::vector<std::string> newColumnNames);
     Header* getColumnNames();
     std::set<Tuple> getTuples();

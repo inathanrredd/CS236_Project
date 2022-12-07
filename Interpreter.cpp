@@ -173,24 +173,31 @@ void Interpreter::interpretRules() {
                 tempRelations.emplace_back(newRel);
             }
             Relation joinedRelation = tempRelations[0];
-            for (unsigned int i = 0; i < tempRelations.size(); i++) {
+            for (unsigned int i = 1; i < tempRelations.size(); i++) {
                 joinedRelation = joinedRelation.join(tempRelations[i]);
             }
-
 
             std::vector<Parameter *> parameters = rule->getHeadPredicate()->getParameters();
             std::vector<std::string> parameterStrings;
             for (auto each: parameters) {
                 parameterStrings.emplace_back(each->getValue());
             }
+//            std::cout << "Paramters:\n";
+            for (auto each: parameterStrings) {
+//                std::cout << each << std::endl;
+            }
             std::vector<int> columnsToProject;
+//            std::cout << "Columns added to project" << std::endl;
             for (unsigned int i = 0; i < joinedRelation.getColumnNames()->getVecAttributes().size(); i++) {
                 if (std::find(parameterStrings.begin(), parameterStrings.end(),
                               joinedRelation.getColumnNames()->getVecAttributes()[i]) != parameterStrings.end()) {
+                    std::cout << joinedRelation.getColumnNames()->getVecAttributes()[i] << std::endl;
                     columnsToProject.emplace_back(i);
                 }
             }
-            joinedRelation.project(columnsToProject, joinedRelation);
+//            std::cout << "Joined relation before project:\n" << joinedRelation.toString();
+            joinedRelation = joinedRelation.project(columnsToProject);
+//            std::cout << "Joined relation after project:\n" << joinedRelation.toString();
             joinedRelation.setName(rule->getHeadPredicate()->getName());
             database.unite(joinedRelation);
 
@@ -198,14 +205,22 @@ void Interpreter::interpretRules() {
                 std::cout << joinedRelation.toString();
             }
             else if (database.countTuples(joinedRelation.GetName()) > newTupleCount){
-                std::cout << joinedRelation.toString(newTupleCount);
+                //std::cout << "Tuples in relation: " << database.countTuples(joinedRelation.GetName()) << std::endl;
+                std::cout << database.GetRelation(joinedRelation.GetName())->toString();
+                //std::cout << "Number of new tuples: " << newTupleCount << std::endl;
+                //std::cout << "Printing out new tuples:\n" << joinedRelation.toString(newTupleCount);
             }
+            //std::cout << "newTupleCount = " << newTupleCount << std::endl;
             newTupleCount = database.countTuples(joinedRelation.GetName());
+            tempRelations.clear();
+            columnsToProject.clear();
+            parameterStrings.clear();
         }
         endCount = database.countAllTuples();
         rulesIterations++;
     }
     std::cout << "\nSchemes populated after " << rulesIterations << " passes through the Rules.\n" << std::endl;
+    database.printAllRelations();
 }
 //
 //Relation* Interpreter::evaluatePredicate(Predicate* p) {

@@ -113,7 +113,9 @@ void Relation::project(std::vector<int> columnsToProject, Relation rel) {
 //    std::cout << "In project" << std::endl;
 //    Relation relation;
     std::vector<std::string> newNames;
+//    std::cout << "Column names to be added:" << std::endl;
     for (auto index : columnsToProject) {
+//        std::cout << rel.columnNames->getVecAttributes()[index] << std::endl;
         newNames.emplace_back(rel.columnNames->getVecAttributes()[index]);
     }
 //    for (auto i : newNames) {
@@ -122,15 +124,56 @@ void Relation::project(std::vector<int> columnsToProject, Relation rel) {
 //    std::cout << std::endl;
     Header* head = new Header(newNames);
     this->setColumnNames(head);
+//    std::cout << "Relation in project:" << std::endl;
+//    std::cout << this->toString();
     for (auto tuple : rel.tuples) {
         std::vector<std::string> values = {};
         for (auto value : columnsToProject) {
             values.emplace_back(tuple.getTuple()[value]);
         }
+
+//        std::cout << "Values to be added as tuple:\n";
+//        for (auto each: values) {
+//            std::cout << each << ", ";
+//        }
+//        std::cout << std::endl;
         Tuple tup = Tuple(values);
         this->AddTuple(tup);
     }
 //    return relation;
+}
+
+Relation Relation::project(std::vector<int> columnsToProject) {
+    std::vector<std::string> newNames;
+    Relation relation;
+//    std::cout << "Column names to be added:" << std::endl;
+    for (auto index : columnsToProject) {
+//        std::cout << rel.columnNames->getVecAttributes()[index] << std::endl;
+        newNames.emplace_back(this->columnNames->getVecAttributes()[index]);
+    }
+//    for (auto i : newNames) {
+//        std::cout << i << ", ";
+//    }
+//    std::cout << std::endl;
+    Header* head = new Header(newNames);
+    relation.setColumnNames(head);
+//    std::cout << "Relation in project:" << std::endl;
+//    std::cout << this->toString();
+    for (auto tuple : this->getTuples()) {
+        std::vector<std::string> values = {};
+        for (auto value : columnsToProject) {
+            values.emplace_back(tuple.getTuple()[value]);
+        }
+
+//        std::cout << "Values to be added as tuple:\n";
+//        for (auto each: values) {
+//            std::cout << each << ", ";
+//        }
+//        std::cout << std::endl;
+        Tuple tup = Tuple(values);
+        relation.AddTuple(tup);
+    }
+    return relation;
 }
 
 void Relation::rename(std::vector<std::string> newColumnNames) {
@@ -166,19 +209,57 @@ void Relation::setColumnNames(Header *cols) {
 }
 
 Relation Relation::join(Relation rel) {
-    Header* head1 = rel.getColumnNames();
-    Header* newHeader = joinHeader(head1);
+    Header* head2 = rel.getColumnNames();
+//    std::cout << "head1 before joining:\n" << this->getColumnNames()->printAllAttributes() << std::endl;
+//    std::cout << "head2 before joining:\n" << head2->printAllAttributes() << std::endl;
+    Header* newHeader = joinHeader(head2);
+//    std::cout << "header after joining:\n" << newHeader->printAllAttributes() << std::endl;
     Relation newRelation = Relation("new", newHeader);
+    //std::cout << "New relation before adding tuples:\n" << newRelation.toString();
     std::set<Tuple> tupList1 = this->getTuples();
+//    std::cout << "tupList1 tuples:\n";
+//    for (auto each: tupList1) {
+//        std::cout << each.toString() << std::endl;
+//    }
     std::set<Tuple> tupList2 = rel.getTuples();
+//    std::cout << "tupList2 tuples:\n";
+//    for (auto each: tupList2) {
+//        std::cout << each.toString() << std::endl;
+//    }
     std::set<Tuple> newTupList;
     for (auto each:tupList1) {
+//        std::cout << "tup1 before joining:\n" << each.toString() << std::endl;
         for (auto tup:tupList2) {
+//            std::cout << "tup2 before joining:\n" << tup.toString() << std::endl;
             if (isJoinable(each,tup,this->getColumnNames(),rel.getColumnNames())) {
+//                std::cout << "Relation before adding tuple:\n" << newRelation.toString();
                 newRelation.AddTuple(combineTuples(each,tup,this->getColumnNames(),rel.getColumnNames()));
+//                std::cout << "Relation after adding tuple:\n" << newRelation.toString();
+
+//                Tuple newTuple = combineTuples(each,tup,this->getColumnNames(),rel.getColumnNames());
+//                bool unique = true;
+//                for (auto tuple:newRelation.getTuples()) {
+//                    bool diff = false;
+//                    for (unsigned int i=0;i<tuple.getTuple().size();i++) {
+//                        if (tuple.getTuple()[i] != newTuple.getTuple()[i]) {
+//                            diff = true;
+//                        }
+//                    }
+//                    if (!diff) {
+//                        unique= false;
+//                    }
+//                }
+//                if (unique) {
+//                    newRelation.AddTuple(newTuple);
+//                    //std::cout << "Tuple being added:\n" << newRelation.toString() << std::endl;
+//                }
+                //std::cout << "Relation after if:\n" << newRelation.toString() << std::endl;
             }
+            //std::cout << "Relation after big if :\n" << newRelation.toString() << std::endl;
         }
-    }
+        //std::cout << "Relation after for tup:\n" << newRelation.toString() << std::endl;
+    }//std::cout << "Relation after for each:\n" << newRelation.toString() << std::endl;
+//    std::cout << "New join relation:\n" << newRelation.toString();
     return newRelation;
 }
 

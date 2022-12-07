@@ -20,6 +20,7 @@ public:
     std::string printTuple(int index);
     bool operator< (const Tuple &rhs) const;
     std::vector<std::string> getTuple();
+    std::string toString();
 
 
 };

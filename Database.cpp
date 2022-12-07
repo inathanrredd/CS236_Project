@@ -40,6 +40,7 @@ void Database::unite(Relation rel) {
 void Database::printAllRelations() {
     std::string str;
     for (auto relation : relations) {
+        str += relation.second->GetName() + "\n";
         str = str + relation.second->toString();
         str += "\n";
     }
